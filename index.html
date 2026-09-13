@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>TBS · Sistem Karar Haritası</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17242F">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --ink:#17242F; --ink-2:#2E4257; --steel:#6B7680; --steel-lt:#9AA4AC;
+    --oxide:#B5482E; --paper:#EAEDEE; --card:#FFFFFF; --line:#D2D8DB; --line-strong:#B3BCC1;
+    --good:#2E5E3A;
+    --c-pris:#E4EEE6; --c-tap:#BAC8D6; --c-truss:#EAD6CF; --c-laced:#D9A491; --c-prisCol:#E7D08A;
+  }
+  html{color-scheme:light;background:#EAEDEE;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 16px 60px;}
+  .head{margin-top:18px;border:2px solid var(--ink);background:var(--card);}
+  .head-main{padding:14px 18px;}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--oxide);margin:0 0 6px;}
+  h1{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:clamp(22px,5vw,34px);line-height:.98;text-transform:uppercase;margin:0;color:var(--ink);}
+  .head-sub{margin:6px 0 0;color:var(--ink-2);font-size:13px;}
+
+  .sec{font-family:"Saira Condensed";font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);margin:20px 0 8px;display:flex;align-items:center;gap:9px;}
+  .sec::before{content:"";width:20px;height:3px;background:var(--oxide);}
+
+  .maps{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:820px){.maps{grid-template-columns:1fr;}}
+  .mapcard{background:var(--card);border:1px solid var(--line-strong);padding:12px 12px 10px;}
+  .maptop{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+  .mapcard h3{font-family:"Saira Condensed";font-weight:700;font-size:15px;text-transform:uppercase;margin:0;color:var(--ink);}
+  .mapcard .msub{font-family:"IBM Plex Mono";font-size:9.5px;color:var(--steel);margin:2px 0 0;}
+  .mapin{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;}
+  .mapin .grp{display:flex;align-items:center;gap:4px;}
+  .mapin .ml{font-family:"IBM Plex Mono";font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--steel);}
+  .mapin input[type=number]{width:56px;font-family:"IBM Plex Mono";font-size:15px;font-weight:500;padding:4px 6px;border:1px solid var(--line-strong);background:#fbfcfc;text-align:right;color:var(--ink);}
+  .mapin input:focus{outline:2px solid var(--oxide);border-color:var(--oxide);}
+  .mapin .mu{font-family:"IBM Plex Mono";font-size:11px;color:var(--steel);}
+  .togg{display:flex;gap:5px;}
+  .togg button{font-family:"Saira Condensed";font-weight:600;font-size:12px;text-transform:uppercase;padding:5px 9px;border:1px solid var(--line-strong);background:var(--card);cursor:pointer;color:var(--ink-2);}
+  .togg button.on{background:var(--oxide);color:#fff;border-color:var(--oxide);}
+  .disabled{opacity:.35;pointer-events:none;}
+
+  .mapwrap{position:relative;width:100%;cursor:crosshair;touch-action:none;}
+  .mapwrap svg{display:block;width:100%;height:auto;}
+  .mapoverlay{position:absolute;left:0;top:0;pointer-events:none;}
+  .verdict{margin-top:8px;font-size:13px;color:var(--ink-2);} .verdict b{color:var(--ink);}
+  .vt{display:inline-block;font-family:"IBM Plex Mono";font-size:11.5px;padding:2px 8px;border-radius:2px;border:1px solid var(--line-strong);color:var(--ink);}
+  .legend{display:flex;flex-wrap:wrap;gap:11px;margin-top:6px;font-family:"IBM Plex Mono";font-size:10px;color:var(--steel);}
+  .legend i{display:inline-block;width:11px;height:11px;margin-right:4px;vertical-align:-1px;border:1px solid var(--line-strong);}
+  .hint{font-family:"IBM Plex Mono";font-size:11px;color:var(--steel);text-align:center;margin:12px 0 0;}
+  .hint b{color:var(--oxide);}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  @media(max-width:560px){.cards{grid-template-columns:1fr;}}
+  .scard{border:1px solid var(--line-strong);background:var(--card);padding:12px 14px;border-top:4px solid var(--ink-2);}
+  .scard .ck{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin:0 0 4px;}
+  .scard .ctypes{font-family:"Saira Condensed";font-weight:700;font-size:16px;color:var(--ink);}
+  .miniin{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;}
+  .miniin .fld{display:flex;flex-direction:column;gap:3px;}
+  .miniin label{font-family:"IBM Plex Mono";font-size:10px;text-transform:uppercase;color:var(--steel);}
+  .miniin input{width:96px;font-family:"IBM Plex Mono";font-size:14px;padding:7px 9px;border:1px solid var(--line-strong);background:#fbfcfc;}
+  .miniin input:focus{outline:2px solid var(--oxide);border-color:var(--oxide);}
+  .cladtgl{display:flex;gap:7px;align-items:center;margin:0 0 10px;flex-wrap:wrap;}
+  .cladtgl .lbl{font-size:12.5px;font-weight:600;color:var(--ink-2);}
+  .togg.sm button{font-size:12.5px;padding:6px 11px;background:var(--card);color:var(--ink-2);border-color:var(--line-strong);}
+  .togg.sm button.on{background:var(--ink-2);color:#fff;border-color:var(--ink-2);}
+
+  .firmtbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line-strong);font-size:13.5px;}
+  .firmtbl th{background:var(--ink);color:#fff;font-family:"Saira Condensed";font-weight:600;font-size:12.5px;text-transform:uppercase;text-align:right;padding:8px 9px;border-right:1px solid #33424f;}
+  .firmtbl th:first-child{text-align:left;}
+  .firmtbl td{border-top:1px solid var(--line);padding:8px 9px;text-align:right;font-family:"IBM Plex Mono";color:var(--ink);}
+  .firmtbl td:first-child{text-align:left;font-family:"IBM Plex Sans";font-weight:600;}
+  .firmtbl tr:nth-child(even) td{background:#fafbfb;}
+  .firmtbl .big{font-family:"Saira Condensed";font-weight:700;font-size:16px;color:var(--oxide);}
+  .firmtbl tr.tbs td{background:#eef3f0;} .firmtbl tr.tbs td:first-child{color:var(--good);}
+  .firmcap{font-family:"IBM Plex Mono";font-size:11px;color:var(--steel);margin:7px 0 0;line-height:1.45;}
+  .resbar{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px;}.rescell{flex:1 1 140px;border:1px solid var(--line-strong);background:var(--card);border-top:4px solid var(--oxide);padding:12px 14px;}.rescell .rlab{font-family:"IBM Plex Mono";font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);}.rescell .rval{font-family:"Saira Condensed";font-weight:700;font-size:30px;line-height:1.05;color:var(--oxide);}.rescell .run{font-family:"IBM Plex Mono";font-size:11px;color:var(--steel);}
+  details{margin-top:16px;background:var(--card);border:1px solid var(--line-strong);}
+  summary{font-family:"Saira Condensed";font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.03em;padding:11px 14px;cursor:pointer;color:var(--ink-2);}
+  .coefwrap{padding:0 14px 14px;}
+  .coefsub{font-family:"Saira Condensed";font-weight:600;font-size:13px;text-transform:uppercase;color:var(--oxide);margin:14px 0 7px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;}
+  .cf{display:flex;flex-direction:column;gap:3px;}
+  .cf label{font-size:10.5px;font-family:"IBM Plex Mono";color:var(--steel);text-transform:uppercase;}
+  .cf input{font-family:"IBM Plex Mono";font-size:13.5px;padding:6px 8px;border:1px solid var(--line-strong);background:#fbfcfc;color:var(--ink);}
+  .resetbtn{margin-top:12px;font-family:"Saira Condensed";font-weight:600;font-size:13px;text-transform:uppercase;padding:8px 14px;background:var(--card);border:1px solid var(--line-strong);cursor:pointer;color:var(--ink-2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><div class="head-main">
+    <p class="kicker">TBS Mühendislik · Benchmark · PEB-ARC-02G</p>
+    <h1>Sistem Karar Haritası</h1>
+    <p class="head-sub">Her harita için değeri <b>imleçle tıklayarak</b> ya da <b>kutulara yazarak</b> girin — ikisi eş çalışır. İkincil ağırlıklar ve sistem eşikleri üretici kesit tablolarına göre kalibre edilmiştir.</p>
+  </div></div>
+
+  <div class="sec">Karar Haritaları</div>
+  <div class="maps">
+    <div class="mapcard">
+      <div class="maptop">
+        <div><h3>Çatı Kirişi / Makas</h3><p class="msub">Açıklık × Kar</p></div>
+        <div class="mapin">
+          <div class="grp"><span class="ml">Açıklık</span><input type="number" id="span_n" value="24" min="3" max="80" step="0.5"><span class="mu">m</span></div>
+          <div class="grp"><span class="ml">Kar</span><input type="number" id="snow_n" value="75" min="0" max="300" step="5"><span class="mu">kg/m²</span></div>
+        </div>
+      </div>
+      <div class="mapwrap" id="wrap1"><div id="base1"></div><svg class="mapoverlay" id="ov1" viewBox="0 0 600 400"></svg></div>
+      <div class="verdict" id="v1"></div>
+      <div class="legend"><span><i style="background:var(--c-pris)"></i>Prizmatik</span><span><i style="background:var(--c-tap)"></i>Değişken</span><span><i style="background:var(--c-truss)"></i>Kafes</span></div>
+    </div>
+    <div class="mapcard">
+      <div class="maptop">
+        <div><h3>Kolon Sistemi</h3><p class="msub">Saçak × Vinç · alt şerit = vinçsiz</p></div>
+        <div class="mapin">
+          <div class="grp"><span class="ml">Saçak</span><input type="number" id="eave_n" value="7" min="2" max="25" step="0.5"><span class="mu">m</span></div>
+          <div class="grp"><span class="ml">Vinç</span><div class="togg" id="craneTgl"><button data-v="0" class="on">Yok</button><button data-v="1">Var</button></div></div>
+          <div class="grp" id="tonGrp"><input type="number" id="ton_n" value="10" min="0" max="50" step="1"><span class="mu">t</span></div>
+        </div>
+      </div>
+      <div class="mapwrap" id="wrap2"><div id="base2"></div><svg class="mapoverlay" id="ov2" viewBox="0 0 600 400"></svg></div>
+      <div class="verdict" id="v2"></div>
+      <div class="legend"><span><i style="background:var(--c-tap)"></i>Değişken</span><span><i style="background:var(--c-prisCol)"></i>Prizmatik</span><span><i style="background:var(--c-laced)"></i>Örgü</span></div>
+    </div>
+  </div>
+  <p class="hint">Haritada gez → imleç değeri gösterir · <b>tık</b> ile seç · ya da kutulara yaz.</p>
+
+  <div class="sec">Rapor</div>
+  <div id="report"></div>
+</div>
+
+<script>
+const SNOW_REF=0.75, CRANE_TRUSS_PULL_TON=20, CRANE_TRUSS_PULL_M=4;
+const TDEF={prisMax:12,trussBase:52,snowSens:3,colTaper:12,lacedEave:16,lacedTon:25,lacedCraneEave:14};
+const WDEF={pBase:3.5,pK:0.55,pExp:1.15,snowFac:0.18,eaveK:0.7,craneK:0.5,sBase:6,sSnowK:4,sBayK:1.0,connFrac:0.10};
+const TFDEF={rafter_pris:0.95,rafter_tap:1.00,rafter_truss:0.97,col_tap:0.97,col_pris:1.00,col_laced:1.08};
+let T=Object.assign({},TDEF),W=Object.assign({},WDEF),TF=Object.assign({},TFDEF);
+
+const COL={pris:'#E4EEE6',tap:'#BAC8D6',truss:'#EAD6CF',laced:'#D9A491',prisCol:'#E7D08A'};
+const INK='#17242F',STEEL='#6B7680',INK2='#2E4257',OXIDE='#B5482E';
+const RLBL={pris:'Prizmatik',tap:'Değişken kesit',truss:'Kafes (makas)'};
+const CLBL={tap:'Değişken kesit',pris:'Prizmatik',laced:'Örgü (laced)'};
+const G={ox:54,oy:12,pw:512,ph:326,W:600,H:400}; G.x1=G.ox+G.pw; G.y1=G.oy+G.ph;
+const M1={xmin:3,xmax:80,ymax:3};
+const M2={xmin:2,xmax:25,tmin:0,tmax:50}; M2.vb=0.18*G.ph; M2.gap=7; M2.ybreak=G.y1-M2.vb; M2.cBot=M2.ybreak-M2.gap; M2.cTop=G.oy;
+
+const S={span:24,snow:0.75,eave:7,crane:false,ton:10,bay:7.5,area:0};
+const $=id=>document.getElementById(id);
+function fmt(v){return (Math.abs(v-Math.round(v))<1e-9)?(''+Math.round(v)):(''+(Math.round(v*100)/100));}
+function f1(v){return (Math.round(v*10)/10).toLocaleString('tr-TR');}
+function f0(v){return Math.round(v).toLocaleString('tr-TR');}
+function frange(a,b,s){let o=[],v=a;while(v<=b+1e-9){o.push(Math.round(v*1000)/1000);v+=s;}return o;}
+function clamp(v,a,b){return Math.min(b,Math.max(a,v));}
+
+function curTon(){return S.crane?S.ton:0;}
+function trussThr(snow){let se=Math.max(0,snow-SNOW_REF);let thr=T.trussBase-(se/0.5)*T.snowSens;if(S.crane&&curTon()>=CRANE_TRUSS_PULL_TON)thr-=CRANE_TRUSS_PULL_M;return thr;}
+function rafter(span,snow){const thr=trussThr(snow);if(span<=T.prisMax)return'pris';if(span<=thr)return'tap';return'truss';}
+function colCrane(eave,ton){const lc=ton>=T.lacedTon,ltc=eave>=T.lacedCraneEave&&ton>=T.lacedTon*0.5,lt=eave>=T.lacedEave;return(lc||ltc||lt)?'laced':'pris';}
+function colNo(eave){if(eave<=T.colTaper)return'tap';if(eave>=T.lacedEave)return'laced';return'pris';}
+
+function baseWeights(){
+  let primary=(W.pBase+W.pK*Math.pow(S.span,W.pExp))*(1+W.snowFac*Math.max(0,S.snow-SNOW_REF))+W.eaveK*Math.max(0,S.eave-6)+W.craneK*curTon();
+  let secondary=W.sBase+W.sSnowK*S.snow+W.sBayK*Math.max(0,S.bay-6);
+  return {primary,secondary};
+}
+function typeFactor(rt,ct){return 0.6*TF['rafter_'+rt]+0.4*TF['col_'+ct];}
+function weightFor(rt,ct){const b=baseWeights();const tf=typeFactor(rt,ct);const pt=b.primary*tf;const conn=W.connFrac*pt;
+  return {skeleton:pt+b.secondary+conn,b,pt,conn};}
+
+const sx1=v=>G.ox+(v-M1.xmin)/(M1.xmax-M1.xmin)*G.pw, sy1=k=>G.y1-k/M1.ymax*G.ph;
+const sx2=e=>G.ox+(e-M2.xmin)/(M2.xmax-M2.xmin)*G.pw, syT=t=>M2.cBot-(t-M2.tmin)/(M2.tmax-M2.tmin)*(M2.cBot-M2.cTop);
+function drawBase1(){
+  const nx=120,ny=110,dx=G.pw/nx,dy=G.ph/ny;let s=`<svg viewBox="0 0 ${G.W} ${G.H}" xmlns="http://www.w3.org/2000/svg">`;
+  for(let i=0;i<nx;i++){const span=M1.xmin+(i+0.5)/nx*(M1.xmax-M1.xmin);let j=0;
+    while(j<ny){const kar=(j+0.5)/ny*M1.ymax;const k=rafter(span,kar);let j2=j+1;
+      while(j2<ny&&rafter(span,(j2+0.5)/ny*M1.ymax)===k)j2++;
+      s+=`<rect x="${(G.ox+i*dx).toFixed(2)}" y="${(G.oy+(G.ph-j2*dy)).toFixed(2)}" width="${(dx+0.5).toFixed(2)}" height="${((j2-j)*dy+0.5).toFixed(2)}" fill="${COL[k]}"/>`;j=j2;}}
+  const bx=170,by=110,bdx=G.pw/bx,bdy=G.ph/by;
+  for(let i=0;i<bx;i++){const span=M1.xmin+(i+0.5)/bx*(M1.xmax-M1.xmin);
+    for(let j=0;j<by;j++){const kar=(j+0.5)/by*M1.ymax;const k=rafter(span,kar);
+      if(i+1<bx&&rafter(M1.xmin+(i+1.5)/bx*(M1.xmax-M1.xmin),kar)!==k){const X=G.ox+(i+1)*bdx,Y=G.y1-(j+1)*bdy;s+=`<line x1="${X.toFixed(1)}" y1="${Y.toFixed(1)}" x2="${X.toFixed(1)}" y2="${(Y+bdy).toFixed(1)}" stroke="${INK}" stroke-width="1"/>`;}
+      if(j+1<by&&rafter(span,(j+1.5)/by*M1.ymax)!==k){const X=G.ox+i*bdx,Y=G.y1-(j+1)*bdy;s+=`<line x1="${X.toFixed(1)}" y1="${Y.toFixed(1)}" x2="${(X+bdx).toFixed(1)}" y2="${Y.toFixed(1)}" stroke="${INK}" stroke-width="1"/>`;}}}
+  s+=`<rect x="${G.ox}" y="${G.oy}" width="${G.pw}" height="${G.ph}" fill="none" stroke="${INK}" stroke-width="1.5"/>`;
+  frange(10,80,10).forEach(t=>{const X=sx1(t);s+=`<line x1="${X}" y1="${G.oy}" x2="${X}" y2="${G.y1}" stroke="${INK}" stroke-opacity="0.09" stroke-width="0.6"/><line x1="${X}" y1="${G.y1}" x2="${X}" y2="${G.y1+5}" stroke="${STEEL}"/><text x="${X}" y="${G.y1+17}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="${STEEL}">${fmt(t)}</text>`;});
+  frange(0,3,0.5).forEach(t=>{const Y=sy1(t);s+=`<line x1="${G.ox}" y1="${Y}" x2="${G.x1}" y2="${Y}" stroke="${INK}" stroke-opacity="0.09" stroke-width="0.6"/><line x1="${G.ox-5}" y1="${Y}" x2="${G.ox}" y2="${Y}" stroke="${STEEL}"/><text x="${G.ox-7}" y="${Y+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="${STEEL}">${f0(t*100)}</text>`;});
+  s+=`<text x="${G.ox+G.pw/2}" y="${G.y1+31}" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="${INK2}">Açıklık (m)</text><text x="14" y="${G.oy+G.ph/2}" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="${INK2}" transform="rotate(-90 14 ${G.oy+G.ph/2})">Kar (kg/m²)</text>`;
+  [[7,1.5,'PRİZ.'],[34,1.6,'DEĞİŞKEN'],[68,1.6,'KAFES']].forEach(L=>{s+=`<text x="${sx1(L[0])}" y="${sy1(L[1])}" text-anchor="middle" font-family="Saira Condensed" font-weight="700" font-size="14" fill="${INK}" opacity="0.55">${L[2]}</text>`;});
+  return s+'</svg>';
+}
+function drawBase2(){
+  const nx=120,dxp=G.pw/nx,nyc=120,hh=(M2.cBot-M2.cTop)/nyc;let s=`<svg viewBox="0 0 ${G.W} ${G.H}" xmlns="http://www.w3.org/2000/svg">`;
+  const cc={tap:COL.tap,pris:COL.prisCol,laced:COL.laced};
+  for(let i=0;i<nx;i++){const e=M2.xmin+(i+0.5)/nx*(M2.xmax-M2.xmin);let j=0;
+    while(j<nyc){const t=M2.tmin+(j+0.5)/nyc*(M2.tmax-M2.tmin);const k=colCrane(e,t);let j2=j+1;
+      while(j2<nyc&&colCrane(e,M2.tmin+(j2+0.5)/nyc*(M2.tmax-M2.tmin))===k)j2++;
+      s+=`<rect x="${(G.ox+i*dxp).toFixed(2)}" y="${(M2.cBot-j2*hh).toFixed(2)}" width="${(dxp+0.5).toFixed(2)}" height="${((j2-j)*hh+0.5).toFixed(2)}" fill="${cc[k]}"/>`;j=j2;}}
+  const bx=160,bny=120,bdx=G.pw/bx,bh=(M2.cBot-M2.cTop)/bny;
+  for(let i=0;i<bx;i++){const e=M2.xmin+(i+0.5)/bx*(M2.xmax-M2.xmin);
+    for(let j=0;j<bny;j++){const t=M2.tmin+(j+0.5)/bny*(M2.tmax-M2.tmin);const k=colCrane(e,t);
+      if(i+1<bx&&colCrane(M2.xmin+(i+1.5)/bx*(M2.xmax-M2.xmin),t)!==k){const X=G.ox+(i+1)*bdx,Y=M2.cBot-(j+1)*bh;s+=`<line x1="${X.toFixed(1)}" y1="${Y.toFixed(1)}" x2="${X.toFixed(1)}" y2="${(Y+bh).toFixed(1)}" stroke="${INK}" stroke-width="1"/>`;}
+      if(j+1<bny&&colCrane(e,M2.tmin+(j+1.5)/bny*(M2.tmax-M2.tmin))!==k){const X=G.ox+i*bdx,Y=M2.cBot-(j+1)*bh;s+=`<line x1="${X.toFixed(1)}" y1="${Y.toFixed(1)}" x2="${(X+bdx).toFixed(1)}" y2="${Y.toFixed(1)}" stroke="${INK}" stroke-width="1"/>`;}}}
+  for(let i=0;i<nx;i++){const e=M2.xmin+(i+0.5)/nx*(M2.xmax-M2.xmin);const k=colNo(e);
+    s+=`<rect x="${(G.ox+i*dxp).toFixed(2)}" y="${M2.ybreak.toFixed(2)}" width="${(dxp+0.5).toFixed(2)}" height="${M2.vb.toFixed(2)}" fill="${cc[k]}"/>`;}
+  [T.colTaper,T.lacedEave].forEach(b=>{const X=sx2(b);s+=`<line x1="${X}" y1="${M2.ybreak}" x2="${X}" y2="${G.y1}" stroke="${INK}" stroke-width="1"/>`;});
+  frange(4,24,4).forEach(e=>{const X=sx2(e);s+=`<line x1="${X}" y1="${G.oy}" x2="${X}" y2="${M2.cBot}" stroke="${INK}" stroke-opacity="0.09" stroke-width="0.6"/><line x1="${X}" y1="${G.y1}" x2="${X}" y2="${G.y1+5}" stroke="${STEEL}"/><text x="${X}" y="${G.y1+17}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="${STEEL}">${fmt(e)}</text>`;});
+  frange(0,50,10).forEach(t=>{const Y=syT(t);s+=`<line x1="${G.ox}" y1="${Y}" x2="${G.x1}" y2="${Y}" stroke="${INK}" stroke-opacity="0.09" stroke-width="0.6"/><line x1="${G.ox-5}" y1="${Y}" x2="${G.ox}" y2="${Y}" stroke="${STEEL}"/><text x="${G.ox-7}" y="${Y+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="${STEEL}">${fmt(t)}</text>`;});
+  const ymid=(M2.cBot+M2.ybreak)/2;
+  s+=`<line x1="${G.ox}" y1="${ymid}" x2="${G.x1}" y2="${ymid}" stroke="#fff" stroke-width="${M2.gap}"/><line x1="${G.ox}" y1="${ymid}" x2="${G.x1}" y2="${ymid}" stroke="${STEEL}" stroke-width="1" stroke-dasharray="5 4"/>`;
+  s+=`<rect x="${G.ox}" y="${G.oy}" width="${G.pw}" height="${(M2.cBot-G.oy).toFixed(1)}" fill="none" stroke="${INK}" stroke-width="1.5"/><rect x="${G.ox}" y="${M2.ybreak.toFixed(1)}" width="${G.pw}" height="${M2.vb.toFixed(1)}" fill="none" stroke="${INK}" stroke-width="1.5"/>`;
+  s+=`<text x="${G.ox-7}" y="${(M2.ybreak+G.y1)/2+3.5}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="${OXIDE}">vinçsiz</text>`;
+  s+=`<text x="${G.ox+G.pw/2}" y="${G.y1+31}" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="${INK2}">Saçak (m)</text><text x="13" y="${(G.oy+M2.cBot)/2}" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="${INK2}" transform="rotate(-90 13 ${(G.oy+M2.cBot)/2})">Vinç tonajı (t)</text>`;
+  s+=`<text x="${sx2(7)}" y="${syT(9)}" text-anchor="middle" font-family="Saira Condensed" font-weight="700" font-size="14" fill="${INK}" opacity="0.55">PRİZMATİK</text><text x="${sx2(20)}" y="${syT(38)}" text-anchor="middle" font-family="Saira Condensed" font-weight="700" font-size="14" fill="${INK}" opacity="0.55">ÖRGÜ</text>`;
+  const yb=(M2.ybreak+G.y1)/2+4;
+  s+=`<text x="${sx2(7)}" y="${yb}" text-anchor="middle" font-family="Saira Condensed" font-weight="700" font-size="11.5" fill="${INK}" opacity="0.7">DEĞİŞKEN</text><text x="${sx2(14)}" y="${yb}" text-anchor="middle" font-family="Saira Condensed" font-weight="700" font-size="9.5" fill="${INK}" opacity="0.7">PRİZ.</text><text x="${sx2(20.5)}" y="${yb}" text-anchor="middle" font-family="Saira Condensed" font-weight="700" font-size="11.5" fill="${INK}" opacity="0.7">ÖRGÜ</text>`;
+  return s+'</svg>';
+}
+
+function pinParts(X,Y,lab){
+  const fs=window.innerWidth<820?1.5:1;
+  let s=`<line x1="${X}" y1="${Y}" x2="${X}" y2="${G.y1}" stroke="${OXIDE}" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/><line x1="${G.ox}" y1="${Y}" x2="${X}" y2="${Y}" stroke="${OXIDE}" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>`;
+  s+=`<circle cx="${X}" cy="${Y}" r="${7*fs}" fill="${INK}" stroke="#fff" stroke-width="${2.2*fs}"/><circle cx="${X}" cy="${Y}" r="${12*fs}" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.5"/>`;
+  let tx=X+11,ty=Y-11,anchor='start'; if(tx>G.x1-90){tx=X-11;anchor='end';} if(ty<G.oy+24)ty=Y+24;
+  s+=`<text x="${tx}" y="${ty}" text-anchor="${anchor}" font-family="Saira Condensed" font-weight="700" font-size="${15*fs}" fill="${INK}" stroke="#fff" stroke-width="${3.5*fs}" paint-order="stroke" style="stroke-linejoin:round">${lab}</text>`;
+  return s;
+}
+function crossParts(X,Y,lab){
+  const fs=window.innerWidth<820?1.5:1;const box=7;
+  let s=`<line x1="${G.ox}" y1="${Y}" x2="${G.x1}" y2="${Y}" stroke="${OXIDE}" stroke-width="1.2"/><line x1="${X}" y1="${G.oy}" x2="${X}" y2="${G.y1}" stroke="${OXIDE}" stroke-width="1.2"/><rect x="${X-box}" y="${Y-box}" width="${box*2}" height="${box*2}" fill="none" stroke="${OXIDE}" stroke-width="1.2"/>`;
+  let tx=X+12,ty=Y-12,anchor='start'; if(tx>G.x1-90){tx=X-12;anchor='end';} if(ty<G.oy+26)ty=Y+26;
+  s+=`<text x="${tx}" y="${ty}" text-anchor="${anchor}" font-family="Saira Condensed" font-weight="700" font-size="${16*fs}" fill="${INK}" stroke="#fff" stroke-width="${4*fs}" paint-order="stroke" style="stroke-linejoin:round">${lab}</text>`;
+  return s;
+}
+function ovWrap(inner){return `<svg viewBox="0 0 ${G.W} ${G.H}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;}
+
+/* value readouts from viewBox coords */
+function valAt1(vbx,vby){const cx=clamp(vbx,G.ox,G.x1),cy=clamp(vby,G.oy,G.y1);
+  return {cx,cy,span:Math.round((M1.xmin+(cx-G.ox)/G.pw*(M1.xmax-M1.xmin))*2)/2,snow:Math.round(((G.y1-cy)/G.ph*M1.ymax)*20)/20};}
+function valAt2(vbx,vby){const cx=clamp(vbx,G.ox,G.x1),cy=clamp(vby,G.oy,G.y1);
+  const eave=Math.round((M2.xmin+(cx-G.ox)/G.pw*(M2.xmax-M2.xmin))*2)/2;
+  let crane,ton,cyDraw;
+  if(cy<M2.cBot){crane=true;ton=clamp((M2.cBot-cy)/(M2.cBot-M2.cTop)*(M2.tmax-M2.tmin),0,M2.tmax);ton=Math.round(ton);cyDraw=cy;}
+  else{crane=false;ton=0;cyDraw=(M2.ybreak+G.y1)/2;}
+  return {cx,cy:cyDraw,eave,crane,ton};}
+
+let lastBase1Key='';
+function drawOverlays(hover){ // hover = {map:1|2, cx, cy, lab} or null
+  const p1=pinParts(sx1(clamp(S.span,M1.xmin,M1.xmax)),sy1(clamp(S.snow,0,M1.ymax)),`${fmt(S.span)} m · kar ${f0(S.snow*100)}`);
+  const X2=sx2(clamp(S.eave,M2.xmin,M2.xmax)), Y2=S.crane?syT(clamp(S.ton,M2.tmin,M2.tmax)):(M2.ybreak+G.y1)/2;
+  const p2=pinParts(X2,Y2,S.crane?`${fmt(S.eave)} m · ${fmt(S.ton)} t`:`${fmt(S.eave)} m · vinçsiz`);
+  let o1=p1,o2=p2;
+  if(hover&&hover.map===1) o1=p1+crossParts(hover.cx,hover.cy,hover.lab);
+  if(hover&&hover.map===2) o2=p2+crossParts(hover.cx,hover.cy,hover.lab);
+  $('ov1').innerHTML=ovWrap(o1); $('ov2').innerHTML=ovWrap(o2);
+}
+function update(hover){
+  const b1key=(S.crane&&S.ton>=CRANE_TRUSS_PULL_TON)?'pull':'nopull';
+  if(b1key!==lastBase1Key){$('base1').innerHTML=drawBase1();lastBase1Key=b1key;}
+  drawOverlays(hover||null);
+  const rr=rafter(S.span,S.snow), rc=S.crane?colCrane(S.eave,S.ton):colNo(S.eave);
+  $('v1').innerHTML=`Sonuç: <span class="vt" style="background:${COL[rr]}">${RLBL[rr]}</span>`;
+  $('v2').innerHTML=`Sonuç: <span class="vt" style="background:${({tap:COL.tap,pris:COL.prisCol,laced:COL.laced})[rc]}">${CLBL[rc]}</span>`;
+  report(rr,rc);
+}
+function syncBoxes(){$('span_n').value=S.span;$('snow_n').value=Math.round(S.snow*100);$('eave_n').value=S.eave;$('ton_n').value=S.ton;
+  document.querySelectorAll('#craneTgl button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='1')===S.crane));
+  $('tonGrp').classList.toggle('disabled',!S.crane);}
+
+function report(rr,rc){
+  const w=weightFor(rr,rc); const area=S.area;
+  const sk=w.skeleton, tn=area>0?sk*area/1000:0;
+  $('report').innerHTML=`
+    <div class="cards">
+      <div class="scard"><p class="ck">Çatı sistemi</p><div class="ctypes">${RLBL[rr]}</div></div>
+      <div class="scard"><p class="ck">Kolon sistemi</p><div class="ctypes">${CLBL[rc]}</div></div>
+    </div>
+    <div class="miniin">
+      <div class="fld"><label>Bay aralığı (m)</label><input type="number" id="bay_n" value="${S.bay}" min="3" max="15" step="0.5"></div>
+      <div class="fld"><label>Alan m² (ops.)</label><input type="number" id="area_n" value="${S.area||''}" min="0" step="100" placeholder="—"></div>
+    </div>
+    <div class="resbar">
+      <div class="rescell"><div class="rlab">İskelet</div><div class="rval">${f1(sk)}</div><div class="run">kg/m²</div></div>
+      ${area>0?`<div class="rescell"><div class="rlab">İskelet tonaj</div><div class="rval">${f0(tn)}</div><div class="run">ton</div></div>`:''}
+    </div>
+    <p class="firmcap">Seçilen sisteme göre (Çatı: ${RLBL[rr].split(' ')[0]} · Kolon: ${CLBL[rc].split(' ')[0]}). Bileşen: çerçeve ${f1(w.pt)} + ikincil ${f1(w.b.secondary)} + birleşim ${f1(w.conn)} kg/m². kg/m² göstergeseldir; ±%10-15 bant olarak okuyun.</p>
+    <details><summary>Eşik &amp; Ağırlık Katsayıları (düzenlenebilir)</summary><div class="coefwrap">
+      <div class="coefsub">Sistem eşikleri</div><div class="grid" id="thGrid"></div>
+      <div class="coefsub">Ağırlık katsayıları</div><div class="grid" id="wGrid"></div>
+      <div class="coefsub">Sistem-türü çarpanları</div><div class="grid" id="tfGrid"></div>
+      <button class="resetbtn" id="reset">Varsayılanlara dön</button>
+    </div></details>`;
+  wireReport();
+}
+function wireReport(){
+  const bay=$('bay_n'),area=$('area_n');
+  if(bay)bay.addEventListener('input',()=>{S.bay=clamp(+bay.value||0,3,15);const rr=rafter(S.span,S.snow),rc=S.crane?colCrane(S.eave,S.ton):colNo(S.eave);report(rr,rc);});
+  if(area)area.addEventListener('input',()=>{S.area=+area.value||0;const rr=rafter(S.span,S.snow),rc=S.crane?colCrane(S.eave,S.ton):colNo(S.eave);report(rr,rc);});
+  buildCoef();
+  const rs=$('reset');if(rs)rs.addEventListener('click',()=>{T=Object.assign({},TDEF);W=Object.assign({},WDEF);TF=Object.assign({},TFDEF);lastBase1Key='';$('base2').innerHTML=drawBase2();update();});
+}
+const TH_LABELS={prisMax:'Prizmatik kiriş ≤ m',trussBase:'Makas eşiği',snowSens:'Kar duyarlılığı',colTaper:'Değişken kolon ≤',lacedEave:'Örgü saçak eşiği',lacedTon:'Örgü vinç eşiği',lacedCraneEave:'Örgü vinçli saçak'};
+const W_LABELS={pBase:'Çerçeve taban',pK:'Çerçeve açıklık k.',pExp:'Çerçeve üssü',snowFac:'Çerçeve kar ç.',eaveK:'Çerçeve saçak',craneK:'Çerçeve vinç /t',sBase:'İkincil taban',sSnowK:'İkincil kar',sBayK:'İkincil bay',connFrac:'Birleşim oranı'};
+const TF_LABELS={rafter_pris:'Çatı prizmatik',rafter_tap:'Çatı değişken',rafter_truss:'Çatı kafes',col_tap:'Kolon değişken',col_pris:'Kolon prizmatik',col_laced:'Kolon örgü'};
+function buildCoef(){
+  const th=$('thGrid');if(!th)return;
+  th.innerHTML=Object.keys(TH_LABELS).map(k=>`<div class="cf"><label>${TH_LABELS[k]}</label><input type="number" step="0.5" data-t="${k}" value="${T[k]}"></div>`).join('');
+  $('wGrid').innerHTML=Object.keys(W_LABELS).map(k=>`<div class="cf"><label>${W_LABELS[k]}</label><input type="number" step="0.05" data-w="${k}" value="${W[k]}"></div>`).join('');
+  $('tfGrid').innerHTML=Object.keys(TF_LABELS).map(k=>`<div class="cf"><label>${TF_LABELS[k]}</label><input type="number" step="0.01" data-tf="${k}" value="${TF[k]}"></div>`).join('');
+  th.querySelectorAll('input').forEach(i=>i.addEventListener('input',e=>{T[e.target.dataset.t]=+e.target.value||0;lastBase1Key='';$('base2').innerHTML=drawBase2();update();}));
+  $('wGrid').querySelectorAll('input').forEach(i=>i.addEventListener('input',e=>{W[e.target.dataset.w]=+e.target.value||0;const rr=rafter(S.span,S.snow),rc=S.crane?colCrane(S.eave,S.ton):colNo(S.eave);report(rr,rc);}));
+  $('tfGrid').querySelectorAll('input').forEach(i=>i.addEventListener('input',e=>{TF[e.target.dataset.tf]=+e.target.value||0;const rr=rafter(S.span,S.snow),rc=S.crane?colCrane(S.eave,S.ton):colNo(S.eave);report(rr,rc);}));
+}
+
+/* value boxes (per map) */
+$('span_n').addEventListener('input',e=>{S.span=clamp(+e.target.value||0,3,80);update();});
+$('snow_n').addEventListener('input',e=>{S.snow=clamp((+e.target.value||0)/100,0,3);update();});
+$('eave_n').addEventListener('input',e=>{S.eave=clamp(+e.target.value||0,2,25);update();});
+$('ton_n').addEventListener('input',e=>{S.ton=clamp(+e.target.value||0,0,50);update();});
+$('craneTgl').addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')return;S.crane=(e.target.dataset.v==='1');
+  document.querySelectorAll('#craneTgl button').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');
+  $('tonGrp').classList.toggle('disabled',!S.crane);update();});
+
+/* cursor on maps */
+function evVB(ov,cx,cy){const r=ov.getBoundingClientRect();return {vbx:(cx-r.left)*G.W/r.width,vby:(cy-r.top)*G.H/r.height};}
+const w1=$('wrap1'),w2=$('wrap2');
+w1.addEventListener('pointermove',e=>{const p=evVB($('ov1'),e.clientX,e.clientY);const a=valAt1(p.vbx,p.vby);update({map:1,cx:a.cx,cy:a.cy,lab:`${fmt(a.span)} m · ${f0(a.snow*100)}`});});
+w1.addEventListener('pointerdown',e=>{const p=evVB($('ov1'),e.clientX,e.clientY);const a=valAt1(p.vbx,p.vby);update({map:1,cx:a.cx,cy:a.cy,lab:`${fmt(a.span)} m · ${f0(a.snow*100)}`});});
+w1.addEventListener('pointerleave',()=>update(null));
+w1.addEventListener('click',e=>{const p=evVB($('ov1'),e.clientX,e.clientY);const a=valAt1(p.vbx,p.vby);S.span=a.span;S.snow=a.snow;syncBoxes();update();});
+w2.addEventListener('pointermove',e=>{const p=evVB($('ov2'),e.clientX,e.clientY);const a=valAt2(p.vbx,p.vby);update({map:2,cx:a.cx,cy:a.cy,lab:a.crane?`${fmt(a.eave)} m · ${fmt(a.ton)} t`:`${fmt(a.eave)} m · vinçsiz`});});
+w2.addEventListener('pointerdown',e=>{const p=evVB($('ov2'),e.clientX,e.clientY);const a=valAt2(p.vbx,p.vby);update({map:2,cx:a.cx,cy:a.cy,lab:a.crane?`${fmt(a.eave)} m · ${fmt(a.ton)} t`:`${fmt(a.eave)} m · vinçsiz`});});
+w2.addEventListener('pointerleave',()=>update(null));
+w2.addEventListener('click',e=>{const p=evVB($('ov2'),e.clientX,e.clientY);const a=valAt2(p.vbx,p.vby);S.eave=a.eave;S.crane=a.crane;S.ton=a.ton;syncBoxes();update();});
+
+$('base2').innerHTML=drawBase2();
+update();
+window.addEventListener('resize',()=>{clearTimeout(window._rt);window._rt=setTimeout(()=>update(null),150);});
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
+</body>
+</html>

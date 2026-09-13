@@ -1,0 +1,16 @@
+{
+  "name": "TBS Sistem Karar Haritası",
+  "short_name": "TBS Sistem",
+  "description": "PEB çelik yapı sistem karar haritası ve kg/m² tahmini",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EAEDEE",
+  "theme_color": "#17242F",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
